@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    file_provider_paths.xml
+    Defines which directories FileProvider is allowed to share.
+    We use cache-path because camera temp files are written to getCacheDir().
+-->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path
+        name="camera_temp"
+        path="." />
+</paths>

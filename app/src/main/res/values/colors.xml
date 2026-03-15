@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand colour (Material Blue 800) -->
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+
+    <!-- Accent colour (Orange 700) -->
+    <color name="colorAccent">#F57C00</color>
+
+    <!-- Background -->
+    <color name="background_grey">#F5F5F5</color>
+</resources>
