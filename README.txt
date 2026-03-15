@@ -1,240 +1,244 @@
-# Smart Contact Intelligence System
-### Android App | Java | SQLite | Classic Material Design
+# 📱 Smart Contact Intelligence System
+
+![Android](https://img.shields.io/badge/Platform-Android-green?logo=android)
+![Java](https://img.shields.io/badge/Language-Java-orange?logo=java)
+![SQLite](https://img.shields.io/badge/Database-SQLite-blue?logo=sqlite)
+![Min SDK](https://img.shields.io/badge/Min%20SDK-API%2024-yellow)
+![Target SDK](https://img.shields.io/badge/Target%20SDK-API%2035-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
+> A feature-rich Android contact management application with multi-user authentication, location-based filtering, profile photos, and JSON backup/restore functionality.
 
 ---
 
-## PROJECT OVERVIEW
+## 📋 Table of Contents
 
-A fully functional Android contact management app with:
-- Add / Edit / Delete contacts
-- Unique mobile number & email validation (no duplicates)
-- Real-time search by name, mobile, or email
-- Location-based filtering by City and State
-- Offline storage using SQLite (raw queries)
+- [About](#about)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Database Schema](#database-schema)
+- [Modules](#modules)
+- [Validation Rules](#validation-rules)
+- [App Navigation](#app-navigation)
+- [Common Errors & Fixes](#common-errors--fixes)
+- [Developer](#developer)
 
 ---
 
-## PACKAGE STRUCTURE
+## 📖 About
 
-com.imrd.smartcontacts
+The **Smart Contact Intelligence System** is an Android-based mobile application designed to efficiently manage personal and professional contact information with enhanced validation, intelligent filtering, and multi-user security mechanisms.
+
+Unlike traditional phonebook applications that store only basic contact details, this system incorporates structured attributes such as city, state, email address, and profile photo to enable advanced data organization and retrieval. The application enforces strict data integrity rules including unique email validation and duplicate contact number detection, thereby preventing redundant or inconsistent records.
+
+Location-based indexing allows users to filter and sort contacts based on geographic attributes, which is especially useful for organizational, business, and regional communication requirements. The system also supports secure multi-user login with PIN authentication and JSON-based contact backup and restore functionality.
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication & Security
+- Multi-user support — each user has a fully isolated contact list
+- User Registration with Full Name, Username, and 4–6 digit PIN
+- SHA-256 hashed PIN — raw PIN is never stored in the database
+- Persistent login session using SharedPreferences
+- Logout with confirmation dialog
+
+### 👤 Contact Management
+- Add, Edit, and Delete contacts
+- Fields: First Name, Last Name, Mobile (10 digits), Email, City, State
+- Profile photo from **Camera** or **Gallery** (circle cropped, WhatsApp style)
+- Colored initials avatar shown when no photo is set
+- Contacts sorted A–Z by first name
+
+### 🔍 Search & Filter
+- Real-time search by name, mobile number, or email
+- Location-based filtering by City and/or State using dropdown spinners
+- Contacts sorted by state → city → name when filtered
+
+### ✅ Data Validation
+- 10-digit mobile number format enforcement
+- Valid email address format check
+- Duplicate mobile number detection (scoped per user)
+- Duplicate email detection (scoped per user)
+- Validation at two levels: Java layer + SQLite constraints
+
+### 💾 Backup & Restore
+- Export all contacts to `Downloads/SmartContacts/` as a `.json` file
+- Profile photos included in backup (Base64 encoded)
+- Restore contacts from any `.json` backup file
+- Duplicate contacts automatically skipped during restore
+- View and restore from previously saved backup files
+
+---
+
+## 🛠 Tech Stack
+
+| Category         | Technology                          |
+|------------------|-------------------------------------|
+| Language         | Java                                |
+| Platform         | Android (API 24+)                   |
+| Database         | SQLite (Raw Queries, no ORM)        |
+| UI Style         | Classic Material Design             |
+| Image Handling   | Android Bitmap API                  |
+| Security         | SHA-256 PIN Hashing                 |
+| Session          | SharedPreferences                   |
+| Backup Format    | JSON + Base64                       |
+| Build System     | Gradle                              |
+| Min SDK          | API 24 (Android 7.0 Nougat)         |
+| Target SDK       | API 35 (Android 15)                 |
+| IDE              | Android Studio Meerkat 2024.3.2     |
+
+> ✅ No third-party libraries used — pure Android SDK only.
+
+---
+
+## 📁 Project Structure
+
+```
+app/src/main/java/com/imrd/smartcontacts/
+│
 ├── model/
-│   └── Contact.java              ← Data class (POJO) for one contact
+│   ├── Contact.java                  ← Contact data class (POJO)
+│   └── User.java                     ← User data class (POJO)
+│
 ├── database/
-│   └── DatabaseHelper.java       ← All SQLite CRUD operations
+│   └── DatabaseHelper.java           ← All SQLite CRUD — users + contacts
+│
 ├── adapter/
-│   └── ContactAdapter.java       ← RecyclerView adapter for contact list
+│   └── ContactAdapter.java           ← RecyclerView adapter for contact list
+│
+├── util/
+│   ├── ImageHelper.java              ← Bitmap compress, decode, circle crop
+│   ├── BackupManager.java            ← JSON backup and restore logic
+│   ├── SessionManager.java           ← SharedPreferences login session
+│   └── PinHashUtil.java              ← SHA-256 PIN hashing utility
+│
 └── ui/
-    ├── MainActivity.java         ← Home: list + search
-    ├── AddEditContactActivity.java  ← Add new / Edit existing contact
-    ├── ContactDetailActivity.java   ← View full details + Delete
-    └── FilterActivity.java          ← Filter contacts by City / State
+    ├── LoginActivity.java            ← Login screen
+    ├── RegisterActivity.java         ← Registration screen
+    ├── MainActivity.java             ← Home: contact list + search
+    ├── AddEditContactActivity.java   ← Add / Edit contact form
+    ├── ContactDetailActivity.java    ← Contact detail view + delete
+    ├── FilterActivity.java           ← Filter by city / state
+    ├── BackupRestoreActivity.java    ← Backup & restore screen
+    └── PhotoPickerDialog.java        ← Camera / Gallery bottom sheet
+```
 
 ---
 
-## STEP-BY-STEP SETUP IN ANDROID STUDIO
+## 🗄 Database Schema
 
-### STEP 1 — Create a New Project
+### Table: `users`
+| Column       | Type    | Constraint                    |
+|--------------|---------|-------------------------------|
+| `_id`        | INTEGER | PRIMARY KEY AUTOINCREMENT     |
+| `full_name`  | TEXT    | NOT NULL                      |
+| `username`   | TEXT    | NOT NULL UNIQUE               |
+| `pin_hash`   | TEXT    | NOT NULL (SHA-256 hash)       |
+| `created_at` | INTEGER | NOT NULL (Unix timestamp ms)  |
 
-1. Open Android Studio
-2. Click "New Project"
-3. Select "Empty Views Activity"
-4. Fill in:
-   - Name:             SmartContactSystem
-   - Package name:     com.imrd.smartcontacts
-   - Save location:    (your choice)
-   - Language:         Java
-   - Minimum SDK:      API 24 (Android 7.0)
-5. Click Finish and wait for Gradle sync
+### Table: `contacts`
+| Column       | Type    | Constraint                        |
+|--------------|---------|-----------------------------------|
+| `_id`        | INTEGER | PRIMARY KEY AUTOINCREMENT         |
+| `user_id`    | INTEGER | NOT NULL, FOREIGN KEY → users._id |
+| `first_name` | TEXT    | NOT NULL                          |
+| `last_name`  | TEXT    | NOT NULL                          |
+| `mobile`     | TEXT    | NOT NULL                          |
+| `email`      | TEXT    | NOT NULL                          |
+| `city`       | TEXT    | NOT NULL                          |
+| `state`      | TEXT    | NOT NULL                          |
+| `photo`      | BLOB    | nullable                          |
 
----
-
-### STEP 2 — Replace build.gradle (app level)
-
-Open  app/build.gradle  and replace everything with the provided
-file content. Then click "Sync Now" in the yellow banner.
-
-Dependencies added:
-  - androidx.recyclerview:recyclerview:1.3.2
-  - androidx.cardview:cardview:1.0.0
-  - com.google.android.material:material:1.12.0
-
----
-
-### STEP 3 — Create the Java Package Folders
-
-In the Project panel (left sidebar):
-  app > src > main > java > com.imrd.smartcontacts
-
-Right-click on  com.imrd.smartcontacts  → New → Package:
-  Create:  model
-  Create:  database
-  Create:  adapter
-  Create:  ui
+> Mobile and Email uniqueness is enforced **per user** — the same number or email can exist across different user accounts.
 
 ---
 
-### STEP 4 — Create all Java files
+## 🧩 Modules
 
-Right-click each package → New → Java Class
-Copy-paste the provided file contents exactly.
-
-Files to create:
-  model/      → Contact.java
-  database/   → DatabaseHelper.java
-  adapter/    → ContactAdapter.java
-  ui/         → MainActivity.java
-              → AddEditContactActivity.java
-              → ContactDetailActivity.java
-              → FilterActivity.java
-
----
-
-### STEP 5 — Create Layout XML files
-
-Navigate to:  app > src > main > res > layout
-
-Android Studio creates activity_main.xml automatically.
-For the rest, right-click layout folder → New → Layout Resource File.
-
-Files to create (Type: LinearLayout or as provided):
-  activity_main.xml             ← already exists, replace content
-  activity_add_edit_contact.xml
-  activity_contact_detail.xml
-  activity_filter.xml
-  item_contact.xml
+| Module                        | Description                                              | Key Files |
+|-------------------------------|----------------------------------------------------------|-----------|
+| **User Interface Module**     | All screens, layouts, navigation                         | `res/layout/*.xml`, all Activities |
+| **Contact Management Module** | Add, Edit, Delete contacts                               | `AddEditContactActivity`, `DatabaseHelper` |
+| **Data Validation Module**    | Unique mobile/email checks, format validation            | `AddEditContactActivity.attemptSave()`, `DatabaseHelper` |
+| **Location Filtering Module** | Filter and sort contacts by city and state               | `FilterActivity`, `DatabaseHelper.filterByLocation()` |
+| **Local Database Module**     | SQLite raw queries, schema, migrations                   | `DatabaseHelper` (SQLiteOpenHelper) |
+| **Authentication Module**     | Register, Login, Session, PIN hashing                    | `LoginActivity`, `RegisterActivity`, `SessionManager`, `PinHashUtil` |
+| **Backup & Restore Module**   | JSON export to Downloads, import from file               | `BackupManager`, `BackupRestoreActivity` |
+| **Photo Management Module**   | Camera, Gallery, circle crop, BLOB storage               | `ImageHelper`, `PhotoPickerDialog` |
 
 ---
 
-### STEP 6 — Create Drawable XML files
+## ✔️ Validation Rules
 
-Navigate to:  app > src > main > res > drawable
-
-Right-click drawable → New → Drawable Resource File for each:
-
-  bg_search.xml       ← rounded white background for search bar
-  bg_spinner.xml      ← outlined box for spinners
-  ic_add.xml          ← plus icon (FAB)
-  ic_filter.xml       ← filter list icon
-  ic_edit.xml         ← pencil icon (FAB in detail screen)
-  ic_arrow_right.xml  ← chevron right (contact list rows)
-  ic_delete.xml       ← trash icon
-  ic_person.xml       ← person silhouette (empty state)
-
-All vector icon files are provided — just copy-paste the XML.
-You do NOT need to use Vector Asset Studio manually.
+| Field      | Rule                                               |
+|------------|----------------------------------------------------|
+| First Name | Required                                           |
+| Last Name  | Required                                           |
+| Mobile     | Required · exactly 10 digits · unique per user     |
+| Email      | Required · valid format · unique per user          |
+| City       | Required                                           |
+| State      | Required                                           |
+| Username   | Required · min 3 chars · no spaces · unique        |
+| PIN        | Required · 4–6 digits only                         |
 
 ---
 
-### STEP 7 — Replace res/values files
+## 📱 App Navigation
 
-Replace these files with the provided content:
-  res/values/colors.xml
-  res/values/strings.xml
-  res/values/themes.xml   (rename from themes/themes.xml if needed)
-
----
-
-### STEP 8 — Replace AndroidManifest.xml
-
-Open  app > src > main > AndroidManifest.xml
-Replace the entire content with the provided file.
-
-This registers all 4 activities:
-  MainActivity              (LAUNCHER)
-  AddEditContactActivity
-  ContactDetailActivity
-  FilterActivity
-
----
-
-### STEP 9 — Run the App
-
-1. Connect your Android device (USB debugging ON)
-   OR use the API 36 emulator you already have
-2. Click the green Run button (Shift+F10)
-3. App will install and launch automatically
-
----
-
-## DATABASE SCHEMA
-
-Table: contacts
-
-  Column      Type     Constraint
-  ─────────── ──────── ──────────────────────────
-  _id         INTEGER  PRIMARY KEY AUTOINCREMENT
-  first_name  TEXT     NOT NULL
-  last_name   TEXT     NOT NULL
-  mobile      TEXT     NOT NULL UNIQUE
-  email       TEXT     NOT NULL UNIQUE
-  city        TEXT     NOT NULL
-  state       TEXT     NOT NULL
-
-Uniqueness is enforced at TWO levels:
-  1. Java validation before DB call (shows user-friendly error)
-  2. SQLite UNIQUE constraint (safety net)
+```
+App Launch
+    └── LoginActivity  (LAUNCHER)
+          ├── Session exists? → MainActivity (auto-login)
+          └── No session
+                ├── Login    → username + PIN → MainActivity
+                └── Register → create account → MainActivity
+                                    │
+                        ┌───────────┴─────────────────┐
+                        │         MainActivity         │
+                        │   (contact list + search)    │
+                        └───┬──────┬──────┬────────────┘
+                            │      │      │         │
+                         [FAB+] [Filter] [Backup] [Logout]
+                            │      │      │         │
+                        AddEdit  Filter  Backup   Login
+                        Activity Activity Restore  Activity
+                            │
+                       ContactDetail
+                         Activity
+                            │
+                      ┌─────┴──────┐
+                    [Edit]       [Delete]
+                      │
+                   AddEdit
+                   Activity
+```
 
 ---
 
-## VALIDATION RULES
+## 🐛 Common Errors & Fixes
 
-  Field         Rule
-  ──────────    ──────────────────────────────────────────
-  First Name    Required
-  Last Name     Required
-  Mobile        Required | exactly 10 digits | UNIQUE
-  Email         Required | valid format | UNIQUE
-  City          Required
-  State         Required
-
----
-
-## APP SCREENS & NAVIGATION
-
-  MainActivity
-    │
-    ├── [FAB +]          → AddEditContactActivity  (ADD mode)
-    ├── [Filter icon]    → FilterActivity
-    └── [Contact row]    → ContactDetailActivity
-                              │
-                              ├── [FAB ✏️]  → AddEditContactActivity (EDIT mode)
-                              └── [Delete]  → Confirmation dialog → back to MainActivity
+| Error | Fix |
+|-------|-----|
+| `Cannot resolve symbol 'R'` | Build → Clean Project → Rebuild Project |
+| `Duplicate class androidx...` | File → Invalidate Caches → Restart |
+| `resource mipmap/ic_launcher not found` | Add `ic_launcher.xml` in `res/mipmap-anydpi-v26/` |
+| `navigation package does not exist` | Delete `FirstFragment.java`, `SecondFragment.java`, `res/navigation/` |
+| `AppBarConfiguration not found` | Replace auto-generated `MainActivity.java` with provided version |
+| App crashes on launch | Check Logcat. Usually missing drawable or wrong activity name in Manifest |
+| `UNIQUE constraint failed` | Caught by `isMobileExists()` / `isEmailExists()` pre-checks |
+| Backup fails on Android 11+ | Grant `MANAGE_EXTERNAL_STORAGE` in Settings → Apps → Permissions |
 
 ---
 
-## COMMON ERRORS & FIXES
+## 👨‍💻 Developer
 
-ERROR: "Cannot resolve symbol 'R'"
-FIX:   Build → Clean Project → Rebuild Project
+**Asst. Prof. Tahir Husen Najir Mansuri**
 
-ERROR: "Duplicate class androidx..."
-FIX:   File → Invalidate Caches → Restart
-
-ERROR: App crashes on launch
-FIX:   Check Logcat for the red error line. Most likely cause is a
-       missing drawable or a typo in AndroidManifest.xml activity name.
-
-ERROR: "UNIQUE constraint failed"
-FIX:   This should never reach the user — it's caught by isMobileExists()
-       and isEmailExists() before the DB insert. If you see it in Logcat,
-       the pre-check logic may have a package name mismatch.
+📧 [tahirmansuri086@gmail.com](mailto:tahirmansuri086@gmail.com)
 
 ---
 
-## MODULE MAPPING (for your assignment)
-
-  Assignment Module                 → Implementation
-  ──────────────────────────────    ──────────────────────────────────
-  User Interface Module             → All layout XML files + Toolbar
-  Contact Management Module         → AddEditContactActivity + DatabaseHelper (insert/update/delete)
-  Data Validation Module            → AddEditContactActivity.attemptSave() + DatabaseHelper.isMobileExists/isEmailExists
-  Location-Based Filtering Module   → FilterActivity + DatabaseHelper.filterByLocation()
-  Local Database Management Module  → DatabaseHelper.java (SQLiteOpenHelper)
-
----
-
-Developed for:  TY BCA — Android Development Project
-App Name:       Smart Contact Intelligence System
-Language:       Java
-Database:       SQLite (raw queries, no ORM)
-UI Style:       Classic Material Design
+<p align="center">Made with ❤️ using Java & Android SDK</p>
