@@ -1,10 +1,10 @@
 # 📱 Smart Contact Intelligence System
 
-![Android](https://img.shields.io/badge/Platform-Android-green?logo=android)
-![Java](https://img.shields.io/badge/Language-Java-orange?logo=java)
-![SQLite](https://img.shields.io/badge/Database-SQLite-blue?logo=sqlite)
-![Min SDK](https://img.shields.io/badge/Min%20SDK-API%2024-yellow)
-![Target SDK](https://img.shields.io/badge/Target%20SDK-API%2035-brightgreen)
+![Android](https://img.shields.io/badge/Platform-Android-green)
+![Java](https://img.shields.io/badge/Language-Java-orange)
+![SQLite](https://img.shields.io/badge/Database-SQLite-blue)
+![Min SDK](https://img.shields.io/badge/MinSDK-API24-yellow)
+![Target SDK](https://img.shields.io/badge/TargetSDK-API35-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 > A feature-rich Android contact management application with multi-user authentication, location-based filtering, profile photos, and JSON backup/restore functionality.
