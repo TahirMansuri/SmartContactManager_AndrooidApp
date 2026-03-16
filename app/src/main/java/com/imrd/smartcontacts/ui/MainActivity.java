@@ -30,12 +30,14 @@ import com.imrd.smartcontacts.model.Contact;
 import com.imrd.smartcontacts.util.BirthdayScheduler;
 import com.imrd.smartcontacts.util.LocationHelper;
 import com.imrd.smartcontacts.util.SessionManager;
+import com.imrd.smartcontacts.util.SortHelper;
 
 import java.util.List;
 
 /**
- * MainActivity.java  — MODIFIED (Batch 1)
- * Added: GPS Nearby toggle button, birthday alarm scheduling on login
+ * MainActivity.java  — MODIFIED (Batch 2)
+ * Added: Sort button (long-press filter icon), Dashboard button
+ * Kept: GPS Nearby toggle, birthday scheduler from Batch 1
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -46,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private ContactAdapter       adapter;
     private EditText             etSearch;
     private View                 viewEmpty;
-    private ImageButton          btnFilter, btnBackup, btnLogout, btnNearby;
+    private ImageButton          btnFilter, btnBackup, btnLogout, btnNearby, btnDashboard;
     private FloatingActionButton fabAdd;
-    private TextView             tvWelcome, tvNearbyLabel;
+    private TextView             tvWelcome, tvNearbyLabel, tvSortLabel;
 
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
@@ -56,29 +58,24 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean nearbyModeActive = false;
     private String  currentCity      = null;
+    private int     currentSort      = SortHelper.SORT_NAME_AZ; // default A→Z
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         sessionManager = new SessionManager(this);
         if (!sessionManager.isLoggedIn()) {
             startActivity(new Intent(this, LoginActivity.class));
-            finishAffinity();
-            return;
+            finishAffinity(); return;
         }
-
         setContentView(R.layout.activity_main);
         dbHelper = DatabaseHelper.getInstance(this);
         userId   = sessionManager.getLoggedInUserId();
-
         bindViews();
         setupWelcome();
         setupRecyclerView();
         setupSearch();
         setupButtons();
-
-        // Schedule daily birthday check at 8 AM
         BirthdayScheduler.scheduleDailyCheck(this);
     }
 
@@ -99,9 +96,11 @@ public class MainActivity extends AppCompatActivity {
         btnBackup     = findViewById(R.id.btn_backup);
         btnLogout     = findViewById(R.id.btn_logout);
         btnNearby     = findViewById(R.id.btn_nearby);
+        btnDashboard  = findViewById(R.id.btn_dashboard);
         fabAdd        = findViewById(R.id.fab_add);
         tvWelcome     = findViewById(R.id.tv_welcome);
         tvNearbyLabel = findViewById(R.id.tv_nearby_label);
+        tvSortLabel   = findViewById(R.id.tv_sort_label);
     }
 
     private void setupWelcome() {
@@ -131,30 +130,79 @@ public class MainActivity extends AppCompatActivity {
     private void setupButtons() {
         fabAdd.setOnClickListener(v ->
             startActivityForResult(new Intent(this, AddEditContactActivity.class), REQ_ADD_EDIT));
+
+        // Filter — tap = open filter screen, long press = sort dialog
         btnFilter.setOnClickListener(v ->
             startActivity(new Intent(this, FilterActivity.class)));
-        btnBackup.setOnClickListener(v ->
-            startActivity(new Intent(this, BackupRestoreActivity.class)));
-        btnLogout.setOnClickListener(v -> confirmLogout());
-        btnNearby.setOnClickListener(v -> toggleNearbyMode());
+        btnFilter.setOnLongClickListener(v -> { showSortDialog(); return true; });
+
+        btnBackup   .setOnClickListener(v -> startActivity(new Intent(this, BackupRestoreActivity.class)));
+        btnLogout   .setOnClickListener(v -> confirmLogout());
+        btnNearby   .setOnClickListener(v -> toggleNearbyMode());
+        btnDashboard.setOnClickListener(v -> startActivity(new Intent(this, DashboardActivity.class)));
+    }
+
+    // ── Sort dialog ───────────────────────────────────
+
+    private void showSortDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle("Sort Contacts By")
+            .setSingleChoiceItems(SortHelper.SORT_LABELS, currentSort, (dialog, which) -> {
+                currentSort = which;
+                tvSortLabel.setText("Sorted by: " + SortHelper.SORT_LABELS[which]);
+                tvSortLabel.setVisibility(View.VISIBLE);
+                dialog.dismiss();
+                if (nearbyModeActive && currentCity != null) loadNearbyContacts();
+                else loadContacts(etSearch.getText().toString().trim());
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     // ── GPS Nearby ────────────────────────────────────
 
     private void toggleNearbyMode() {
         if (nearbyModeActive) {
-            nearbyModeActive = false;
-            currentCity      = null;
+            nearbyModeActive = false; currentCity = null;
             btnNearby.clearColorFilter();
             tvNearbyLabel.setVisibility(View.GONE);
-            loadContacts("");
-            return;
+            loadContacts(""); return;
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                              Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION);
+            return;
+        }
+        // Check permission
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Show rationale dialog if needed
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Location Permission Needed")
+                        .setMessage("To show contacts near your current location, " +
+                                "please allow location access.")
+                        .setPositiveButton("Grant", (d, w) ->
+                                ActivityCompat.requestPermissions(this,
+                                        new String[]{
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                        }, REQ_LOCATION))
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            } else {
+                // First time asking OR permanently denied
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, REQ_LOCATION);
+            }
             return;
         }
         detectCityAndFilter();
@@ -167,13 +215,10 @@ public class MainActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (city == null || city.isEmpty()) {
                     Toast.makeText(this, "Could not detect city. Check GPS is enabled.",
-                        Toast.LENGTH_LONG).show();
-                    return;
+                        Toast.LENGTH_LONG).show(); return;
                 }
-                currentCity      = city;
-                nearbyModeActive = true;
-                btnNearby.setColorFilter(
-                    getResources().getColor(R.color.colorAccent));
+                currentCity = city; nearbyModeActive = true;
+                btnNearby.setColorFilter(getResources().getColor(R.color.colorAccent));
                 tvNearbyLabel.setVisibility(View.VISIBLE);
                 tvNearbyLabel.setText("📍 Showing contacts in: " + city);
                 loadNearbyContacts();
@@ -183,20 +228,41 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadNearbyContacts() {
         List<Contact> contacts = dbHelper.filterByCity(currentCity, userId);
-        adapter.updateList(contacts);
-        recyclerView.setVisibility(contacts.isEmpty() ? View.GONE  : View.VISIBLE);
-        viewEmpty   .setVisibility(contacts.isEmpty() ? View.VISIBLE : View.GONE);
+        SortHelper.sort(contacts, currentSort);
+        showList(contacts);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_LOCATION && grantResults.length > 0 &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            detectCityAndFilter();
-        } else {
-            Toast.makeText(this, "Location permission denied.", Toast.LENGTH_SHORT).show();
+        if (requestCode == REQ_LOCATION) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                detectCityAndFilter();
+            } else {
+                // Check if permanently denied
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    // Permanently denied — send to Settings
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission Denied")
+                            .setMessage("Location permission was permanently denied. " +
+                                    "Please enable it in App Settings.")
+                            .setPositiveButton("Open Settings", (d, w) -> {
+                                Intent intent = new Intent(
+                                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        android.net.Uri.parse("package:" + getPackageName()));
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                } else {
+                    Toast.makeText(this, "Location permission denied.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
         }
     }
 
@@ -209,14 +275,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LoginActivity.class));
                 finishAffinity();
             })
-            .setNegativeButton("Cancel", null)
-            .show();
+            .setNegativeButton("Cancel", null).show();
     }
 
     private void loadContacts(String query) {
         List<Contact> contacts = query.isEmpty()
             ? dbHelper.getAllContacts(userId)
             : dbHelper.searchContacts(query, userId);
+        SortHelper.sort(contacts, currentSort);
+        showList(contacts);
+    }
+
+    private void showList(List<Contact> contacts) {
         adapter.updateList(contacts);
         recyclerView.setVisibility(contacts.isEmpty() ? View.GONE  : View.VISIBLE);
         viewEmpty   .setVisibility(contacts.isEmpty() ? View.VISIBLE : View.GONE);

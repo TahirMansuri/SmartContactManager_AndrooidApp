@@ -22,22 +22,25 @@ import com.imrd.smartcontacts.database.DatabaseHelper;
 import com.imrd.smartcontacts.model.Contact;
 import com.imrd.smartcontacts.util.ImageHelper;
 import com.imrd.smartcontacts.util.SessionManager;
+import com.imrd.smartcontacts.util.VCardHelper;
 
 /**
- * ContactDetailActivity.java  — MODIFIED (Batch 1)
- * Added: DOB display, Group display, Quick actions (Call, WhatsApp, Email, SMS)
+ * ContactDetailActivity.java  — MODIFIED (Batch 2)
+ * Added: Share as vCard button
+ * Kept: DOB, Group display, Quick actions (Call/WA/Email/SMS) from Batch 1
  */
 public class ContactDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_CONTACT_ID = "contact_id";
 
-    private CardView  cvDetailAvatar;
-    private ImageView ivDetailPhoto;
-    private TextView  tvDetailInitials, tvDetailName, tvDetailMobile,
-                      tvDetailEmail, tvDetailCity, tvDetailState,
-                      tvDetailDob, tvDetailGroup;
+    private CardView     cvDetailAvatar;
+    private ImageView    ivDetailPhoto;
+    private TextView     tvDetailInitials, tvDetailName, tvDetailMobile,
+                         tvDetailEmail, tvDetailCity, tvDetailState,
+                         tvDetailDob, tvDetailGroup;
     private LinearLayout llDobRow, llGroupRow;
     private LinearLayout btnCall, btnWhatsApp, btnEmail, btnSms;
+    private LinearLayout btnShare;  // NEW — share as vCard
 
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
@@ -83,6 +86,7 @@ public class ContactDetailActivity extends AppCompatActivity {
         btnWhatsApp      = findViewById(R.id.btn_action_whatsapp);
         btnEmail         = findViewById(R.id.btn_action_email);
         btnSms           = findViewById(R.id.btn_action_sms);
+        btnShare         = findViewById(R.id.btn_action_share);
     }
 
     private void setupToolbar() {
@@ -103,7 +107,6 @@ public class ContactDetailActivity extends AppCompatActivity {
         });
         findViewById(R.id.btn_delete).setOnClickListener(v -> confirmDelete());
 
-        // Quick Actions
         btnCall.setOnClickListener(v -> {
             if (currentContact == null) return;
             startActivity(new Intent(Intent.ACTION_DIAL,
@@ -116,9 +119,8 @@ public class ContactDetailActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://wa.me/" + number));
             intent.setPackage("com.whatsapp");
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
+            if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
+            else {
                 startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("https://wa.me/" + number)));
                 Toast.makeText(this, "WhatsApp not installed.", Toast.LENGTH_SHORT).show();
@@ -137,13 +139,18 @@ public class ContactDetailActivity extends AppCompatActivity {
             startActivity(new Intent(Intent.ACTION_SENDTO,
                 Uri.parse("smsto:" + currentContact.getMobile())));
         });
+
+        // NEW — Share as vCard
+        btnShare.setOnClickListener(v -> {
+            if (currentContact == null) return;
+            VCardHelper.shareContact(this, currentContact);
+        });
     }
 
     private void loadContact() {
         currentContact = dbHelper.getContactById(contactId, userId);
         if (currentContact == null) { finish(); return; }
 
-        // Avatar
         if (currentContact.hasPhoto()) {
             Bitmap bmp = ImageHelper.bytesToBitmap(currentContact.getPhoto());
             if (bmp != null) {
@@ -160,7 +167,6 @@ public class ContactDetailActivity extends AppCompatActivity {
         tvDetailCity  .setText(currentContact.getCity());
         tvDetailState .setText(currentContact.getState());
 
-        // DOB
         if (currentContact.hasDob()) {
             llDobRow.setVisibility(View.VISIBLE);
             int age = currentContact.getAge();
@@ -171,12 +177,12 @@ public class ContactDetailActivity extends AppCompatActivity {
             llDobRow.setVisibility(View.GONE);
         }
 
-        // Group
         if (currentContact.hasGroup()) {
             llGroupRow.setVisibility(View.VISIBLE);
             tvDetailGroup.setText(currentContact.getGroupTag());
-        TextView tvGroupInfo = findViewById(R.id.tv_detail_group_info);
-        if (tvGroupInfo != null) tvGroupInfo.setText(currentContact.getGroupTag());
+            // also set in info card
+            TextView tvGroupInfo = findViewById(R.id.tv_detail_group_info);
+            if (tvGroupInfo != null) tvGroupInfo.setText(currentContact.getGroupTag());
         } else {
             llGroupRow.setVisibility(View.GONE);
         }
@@ -195,10 +201,8 @@ public class ContactDetailActivity extends AppCompatActivity {
             .setMessage("Are you sure you want to delete " + currentContact.getFullName() + "?")
             .setPositiveButton("Delete", (d, w) -> {
                 dbHelper.deleteContact(contactId, userId);
-                setResult(RESULT_OK);
-                finish();
+                setResult(RESULT_OK); finish();
             })
-            .setNegativeButton("Cancel", null)
-            .show();
+            .setNegativeButton("Cancel", null).show();
     }
 }

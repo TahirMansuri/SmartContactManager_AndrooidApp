@@ -1,70 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_grey"
-    android:orientation="vertical">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background_grey" android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:titleTextColor="@android:color/white" />
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary" android:titleTextColor="@android:color/white"/>
 
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:padding="12dp">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Security / Change PIN -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                app:cardCornerRadius="8dp" app:cardElevation="3dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="SECURITY" android:textColor="@color/colorPrimary"
+                        android:textSize="13sp" android:textStyle="bold"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp" android:layout_marginBottom="12dp"
+                        android:text="Change your login PIN for this account."
+                        android:textColor="#555555" android:textSize="14sp"/>
+                    <Button android:id="@+id/btn_change_pin_shortcut"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:backgroundTint="#455A64"
+                        android:text="🔒  Change PIN"
+                        android:textColor="@android:color/white"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Backup card -->
-            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp" app:cardCornerRadius="8dp" app:cardElevation="3dp">
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                app:cardCornerRadius="8dp" app:cardElevation="3dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="BACKUP" android:textColor="@color/colorPrimary"
-                        android:textSize="13sp" android:textStyle="bold" />
+                        android:textSize="13sp" android:textStyle="bold"/>
                     <TextView android:id="@+id/tv_backup_info" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:layout_marginTop="6dp"
-                        android:layout_marginBottom="12dp" android:textColor="#555555" android:textSize="14sp" />
+                        android:layout_marginBottom="12dp" android:textColor="#555555" android:textSize="14sp"/>
                     <Button android:id="@+id/btn_backup" android:layout_width="match_parent"
                         android:layout_height="48dp" android:backgroundTint="@color/colorPrimary"
                         android:text="Backup Now → Downloads/SmartContacts/"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@android:color/white"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Restore from file card -->
-            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp" app:cardCornerRadius="8dp" app:cardElevation="3dp">
+            <!-- Restore card -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                app:cardCornerRadius="8dp" app:cardElevation="3dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:padding="16dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="RESTORE" android:textColor="@color/colorPrimary"
-                        android:textSize="13sp" android:textStyle="bold" />
+                        android:textSize="13sp" android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:layout_marginTop="6dp" android:layout_marginBottom="12dp"
                         android:text="Pick a .json backup file from your device to import contacts."
-                        android:textColor="#555555" android:textSize="14sp" />
+                        android:textColor="#555555" android:textSize="14sp"/>
                     <Button android:id="@+id/btn_restore_from_file" android:layout_width="match_parent"
                         android:layout_height="48dp" android:backgroundTint="#2E7D32"
-                        android:text="Choose File to Restore"
-                        android:textColor="@android:color/white" />
+                        android:text="Choose File to Restore" android:textColor="@android:color/white"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
             <!-- Existing backup files -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp" android:text="EXISTING BACKUPS"
-                android:textColor="@color/colorPrimary" android:textSize="13sp" android:textStyle="bold" />
+                android:textColor="@color/colorPrimary" android:textSize="13sp" android:textStyle="bold"/>
 
             <TextView android:id="@+id/tv_no_backups" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:gravity="center"
                 android:padding="16dp" android:text="No backup files found."
-                android:textColor="#999999" android:textSize="14sp" android:visibility="gone" />
+                android:textColor="#999999" android:textSize="14sp" android:visibility="gone"/>
 
             <LinearLayout android:id="@+id/ll_backup_files" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:orientation="vertical" />
+                android:layout_height="wrap_content" android:orientation="vertical"/>
 
         </LinearLayout>
     </ScrollView>

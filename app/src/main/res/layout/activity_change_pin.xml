@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/background_grey">
+
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary" android:titleTextColor="@android:color/white"/>
+
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:padding="24dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView android:layout_width="64dp" android:layout_height="64dp"
+                android:layout_gravity="center" android:layout_marginBottom="16dp"
+                android:src="@drawable/ic_lock" android:tint="@color/colorPrimary"
+                android:contentDescription="Change PIN"/>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:layout_marginBottom="24dp"
+                android:text="Enter your current PIN, then choose a new 4–6 digit PIN."
+                android:textColor="#555555" android:textSize="14sp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_current_pin"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Current PIN"
+                app:boxCornerRadiusBottomEnd="8dp" app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp" app:boxCornerRadiusTopStart="8dp"
+                app:passwordToggleEnabled="true">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_current_pin"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="numberPassword" android:maxLength="6" android:maxLines="1"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_new_pin"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:hint="New PIN (4–6 digits)"
+                app:boxCornerRadiusBottomEnd="8dp" app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp" app:boxCornerRadiusTopStart="8dp"
+                app:counterEnabled="true" app:counterMaxLength="6"
+                app:passwordToggleEnabled="true">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_new_pin"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="numberPassword" android:maxLength="6" android:maxLines="1"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_confirm_new_pin"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" android:hint="Confirm New PIN"
+                app:boxCornerRadiusBottomEnd="8dp" app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp" app:boxCornerRadiusTopStart="8dp"
+                app:passwordToggleEnabled="true">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_confirm_new_pin"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="numberPassword" android:maxLength="6" android:maxLines="1"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button android:id="@+id/btn_change_pin"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:layout_marginTop="28dp" android:backgroundTint="@color/colorPrimary"
+                android:text="Change PIN" android:textColor="@android:color/white"
+                android:textSize="16sp"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
