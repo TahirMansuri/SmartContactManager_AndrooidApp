@@ -1,249 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_grey">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/background_grey">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:titleTextColor="@android:color/white" />
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary" android:titleTextColor="@android:color/white"/>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Photo Avatar Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="16dp">
-
-                <FrameLayout
-                    android:layout_width="100dp"
-                    android:layout_height="100dp">
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cv_avatar_container"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+            <!-- Avatar -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:orientation="vertical"
+                android:paddingTop="8dp" android:paddingBottom="12dp">
+                <FrameLayout android:layout_width="100dp" android:layout_height="100dp">
+                    <androidx.cardview.widget.CardView android:id="@+id/cv_avatar_container"
+                        android:layout_width="100dp" android:layout_height="100dp"
+                        android:clickable="true" android:focusable="true"
                         android:foreground="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true"
-                        app:cardCornerRadius="50dp"
-                        app:cardElevation="4dp">
-
-                        <ImageView
-                            android:id="@+id/iv_photo"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:visibility="gone"
-                            android:contentDescription="Profile photo" />
-
-                        <TextView
-                            android:id="@+id/tv_initials_overlay"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textColor="@android:color/white"
-                            android:textSize="32sp"
-                            android:textStyle="bold"
-                            android:text="?" />
-
+                        app:cardCornerRadius="50dp" app:cardElevation="4dp">
+                        <ImageView android:id="@+id/iv_photo" android:layout_width="match_parent"
+                            android:layout_height="match_parent" android:scaleType="centerCrop"
+                            android:visibility="gone" android:contentDescription="Photo"/>
+                        <TextView android:id="@+id/tv_initials_overlay"
+                            android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:gravity="center" android:text="?" android:textColor="@android:color/white"
+                            android:textSize="32sp" android:textStyle="bold"/>
                     </androidx.cardview.widget.CardView>
-
-                    <!-- Camera badge bottom-right -->
-                    <FrameLayout
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
+                    <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
                         android:layout_gravity="bottom|end"
                         android:background="@drawable/bg_avatar_edit_overlay">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_camera"
-                            android:contentDescription="Change photo" />
-
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+                            android:layout_gravity="center" android:src="@drawable/ic_camera"
+                            android:contentDescription="Change photo"/>
                     </FrameLayout>
-
                 </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Tap to add photo"
-                    android:textColor="#888888"
-                    android:textSize="12sp" />
-
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" android:text="Tap to add photo"
+                    android:textColor="#888888" android:textSize="12sp"/>
             </LinearLayout>
 
-            <!-- Section: Personal Info -->
-            <TextView
-                style="@style/SectionLabel"
-                android:text="Personal Information" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_first_name"
+            <!-- Personal Info -->
+            <TextView style="@style/SectionLabel" android:text="Personal Information"/>
+            <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_first_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="First Name *"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_first_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:maxLines="1" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:hint="First Name *"
+                app:boxCornerRadiusBottomEnd="6dp" app:boxCornerRadiusBottomStart="6dp"
+                app:boxCornerRadiusTopEnd="6dp" app:boxCornerRadiusTopStart="6dp">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_first_name"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="textPersonName" android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_last_name"
+            <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_last_name"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Last Name *"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_last_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:maxLines="1" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:hint="Last Name *"
+                app:boxCornerRadiusBottomEnd="6dp" app:boxCornerRadiusBottomStart="6dp"
+                app:boxCornerRadiusTopEnd="6dp" app:boxCornerRadiusTopStart="6dp">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_last_name"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="textPersonName" android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Section: Contact Info -->
-            <TextView
-                style="@style/SectionLabel"
-                android:layout_marginTop="20dp"
-                android:text="Contact Information" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_mobile"
+            <!-- Contact Info -->
+            <TextView style="@style/SectionLabel" android:layout_marginTop="16dp" android:text="Contact Information"/>
+            <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_mobile"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Mobile Number * (10 digits)"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp"
-                app:counterEnabled="true"
-                app:counterMaxLength="10">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_mobile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="phone"
-                    android:maxLength="10"
-                    android:maxLines="1" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:hint="Mobile Number * (10 digits)"
+                app:boxCornerRadiusBottomEnd="6dp" app:boxCornerRadiusBottomStart="6dp"
+                app:boxCornerRadiusTopEnd="6dp" app:boxCornerRadiusTopStart="6dp"
+                app:counterEnabled="true" app:counterMaxLength="10">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_mobile"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="phone" android:maxLength="10" android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_email"
+            <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_email"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Email Address *"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_email"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:hint="Email Address *"
+                app:boxCornerRadiusBottomEnd="6dp" app:boxCornerRadiusBottomStart="6dp"
+                app:boxCornerRadiusTopEnd="6dp" app:boxCornerRadiusTopStart="6dp">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_email"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress" android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Section: Location -->
-            <TextView
-                style="@style/SectionLabel"
-                android:layout_marginTop="20dp"
-                android:text="Location" />
+            <!-- Location (Cascading Spinners) -->
+            <TextView style="@style/SectionLabel" android:layout_marginTop="16dp" android:text="Location"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:layout_marginBottom="4dp"
+                android:text="State *" android:textColor="#555555" android:textSize="13sp"/>
+            <Spinner android:id="@+id/spinner_state" android:layout_width="match_parent"
+                android:layout_height="52dp" android:background="@drawable/bg_spinner"
+                android:paddingStart="12dp" android:paddingEnd="12dp"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_city"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="City *"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_city"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" android:layout_marginBottom="4dp"
+                android:text="City *" android:textColor="#555555" android:textSize="13sp"/>
+            <Spinner android:id="@+id/spinner_city" android:layout_width="match_parent"
+                android:layout_height="52dp" android:background="@drawable/bg_spinner"
+                android:paddingStart="12dp" android:paddingEnd="12dp"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_state"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="State *"
-                app:boxCornerRadiusBottomEnd="6dp"
-                app:boxCornerRadiusBottomStart="6dp"
-                app:boxCornerRadiusTopEnd="6dp"
-                app:boxCornerRadiusTopStart="6dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_state"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
+            <!-- Date of Birth -->
+            <TextView style="@style/SectionLabel" android:layout_marginTop="16dp" android:text="Date of Birth"/>
+            <TextView android:id="@+id/tv_dob_label" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="6dp"
+                android:text="Date of Birth (optional)" android:textColor="#555555" android:textSize="14sp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="6dp" android:orientation="horizontal">
+                <Button android:id="@+id/btn_pick_dob" android:layout_width="0dp"
+                    android:layout_height="44dp" android:layout_weight="1"
+                    android:backgroundTint="@color/colorPrimary" android:text="Pick Date"
+                    android:textColor="@android:color/white" android:textSize="13sp"/>
+                <Button android:id="@+id/btn_clear_dob" android:layout_width="wrap_content"
+                    android:layout_height="44dp" android:layout_marginStart="8dp"
+                    android:backgroundTint="#757575" android:text="Clear"
+                    android:textColor="@android:color/white" android:textSize="13sp"
+                    android:visibility="gone"/>
+            </LinearLayout>
 
-            <!-- Save button -->
-            <Button
-                android:id="@+id/btn_save"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="@color/colorPrimary"
-                android:text="Save Contact"
-                android:textColor="@android:color/white"
-                android:textSize="16sp" />
+            <!-- Group Tag -->
+            <TextView style="@style/SectionLabel" android:layout_marginTop="16dp" android:text="Group / Tag"/>
+            <Spinner android:id="@+id/spinner_group" android:layout_width="match_parent"
+                android:layout_height="52dp" android:layout_marginTop="6dp"
+                android:background="@drawable/bg_spinner"
+                android:paddingStart="12dp" android:paddingEnd="12dp"/>
 
+            <!-- Save Button -->
+            <Button android:id="@+id/btn_save" android:layout_width="match_parent"
+                android:layout_height="52dp" android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp" android:backgroundTint="@color/colorPrimary"
+                android:text="Save Contact" android:textColor="@android:color/white"
+                android:textSize="16sp"/>
         </LinearLayout>
-
     </ScrollView>
-
 </LinearLayout>

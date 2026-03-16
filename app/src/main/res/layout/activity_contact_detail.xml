@@ -2,197 +2,193 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@color/background_grey">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:titleTextColor="@android:color/white" />
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary" android:titleTextColor="@android:color/white"/>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:padding="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" android:padding="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Header card: Avatar + Name -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="3dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingTop="28dp"
-                    android:paddingBottom="24dp"
+            <!-- Header: Avatar + Name -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="10dp"
+                app:cardCornerRadius="8dp" app:cardElevation="3dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center" android:orientation="vertical"
+                    android:paddingTop="24dp" android:paddingBottom="20dp"
                     android:background="@color/colorPrimary">
-
-                    <!-- Circle avatar -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cv_detail_avatar"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        app:cardCornerRadius="45dp"
-                        app:cardElevation="4dp">
-
-                        <!-- Photo (shown when contact has a photo) -->
-                        <ImageView
-                            android:id="@+id/iv_detail_photo"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:visibility="gone"
-                            android:contentDescription="Profile photo" />
-
-                        <!-- Initials (shown when no photo) -->
-                        <TextView
-                            android:id="@+id/tv_detail_initials"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="30sp"
-                            android:textStyle="bold" />
-
+                    <androidx.cardview.widget.CardView android:id="@+id/cv_detail_avatar"
+                        android:layout_width="90dp" android:layout_height="90dp"
+                        app:cardCornerRadius="45dp" app:cardElevation="4dp">
+                        <ImageView android:id="@+id/iv_detail_photo"
+                            android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:scaleType="centerCrop" android:visibility="gone"
+                            android:contentDescription="Photo"/>
+                        <TextView android:id="@+id/tv_detail_initials"
+                            android:layout_width="match_parent" android:layout_height="match_parent"
+                            android:gravity="center" android:textColor="@color/colorPrimary"
+                            android:textSize="30sp" android:textStyle="bold"/>
                     </androidx.cardview.widget.CardView>
-
-                    <TextView
-                        android:id="@+id/tv_detail_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:textColor="@android:color/white"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- Info card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <!-- Mobile -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mobile Number"
-                        android:textColor="#888888"
-                        android:textSize="12sp" />
-                    <TextView
-                        android:id="@+id/tv_detail_mobile"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
-
-                    <!-- Email -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Email Address"
-                        android:textColor="#888888"
-                        android:textSize="12sp" />
-                    <TextView
-                        android:id="@+id/tv_detail_email"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
-
-                    <!-- City -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="City"
-                        android:textColor="#888888"
-                        android:textSize="12sp" />
-                    <TextView
-                        android:id="@+id/tv_detail_city"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
-
-                    <!-- State -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="State"
-                        android:textColor="#888888"
-                        android:textSize="12sp" />
-                    <TextView
-                        android:id="@+id/tv_detail_state"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
+                    <TextView android:id="@+id/tv_detail_name"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" android:textColor="@android:color/white"
+                        android:textSize="22sp" android:textStyle="bold"/>
+                    <TextView android:id="@+id/tv_detail_group"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp" android:background="@drawable/bg_group_badge"
+                        android:paddingStart="12dp" android:paddingEnd="12dp"
+                        android:paddingTop="3dp" android:paddingBottom="3dp"
+                        android:textColor="@android:color/white" android:textSize="12sp"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Delete button -->
-            <Button
-                android:id="@+id/btn_delete"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="80dp"
-                android:backgroundTint="#D32F2F"
-                android:text="Delete Contact"
-                android:textColor="@android:color/white"
-                android:textSize="16sp" />
+            <!-- Quick Actions Row -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="10dp"
+                app:cardCornerRadius="8dp" app:cardElevation="2dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:padding="12dp">
 
+                    <LinearLayout android:id="@+id/btn_action_call" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:orientation="vertical" android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true" android:focusable="true">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+                            android:src="@drawable/ic_call" android:tint="#2E7D32"
+                            android:contentDescription="Call"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp" android:text="Call"
+                            android:textColor="#2E7D32" android:textSize="11sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/btn_action_whatsapp" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:orientation="vertical" android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true" android:focusable="true">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+                            android:src="@drawable/ic_whatsapp" android:tint="#25D366"
+                            android:contentDescription="WhatsApp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp" android:text="WhatsApp"
+                            android:textColor="#25D366" android:textSize="11sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/btn_action_email" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:orientation="vertical" android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true" android:focusable="true">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+                            android:src="@drawable/ic_email" android:tint="#1565C0"
+                            android:contentDescription="Email"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp" android:text="Email"
+                            android:textColor="#1565C0" android:textSize="11sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/btn_action_sms" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:gravity="center" android:orientation="vertical" android:padding="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true" android:focusable="true">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+                            android:src="@drawable/ic_sms" android:tint="#E65100"
+                            android:contentDescription="SMS"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp" android:text="SMS"
+                            android:textColor="#E65100" android:textSize="11sp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Info Card -->
+            <androidx.cardview.widget.CardView android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginBottom="10dp"
+                app:cardCornerRadius="8dp" app:cardElevation="2dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Mobile Number" android:textColor="#888888" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tv_detail_mobile" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                        android:textColor="@android:color/black" android:textSize="16sp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Email Address" android:textColor="#888888" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tv_detail_email" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                        android:textColor="@android:color/black" android:textSize="16sp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="City" android:textColor="#888888" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tv_detail_city" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+                        android:textColor="@android:color/black" android:textSize="16sp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#EEEEEE" android:layout_marginBottom="12dp"/>
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="State" android:textColor="#888888" android:textSize="12sp"/>
+                    <TextView android:id="@+id/tv_detail_state" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:textColor="@android:color/black"
+                        android:textSize="16sp"/>
+
+                    <!-- DOB Row -->
+                    <LinearLayout android:id="@+id/ll_dob_row" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"
+                        android:visibility="gone">
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:background="#EEEEEE" android:layout_marginTop="12dp"
+                            android:layout_marginBottom="12dp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Date of Birth" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tv_detail_dob" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="@android:color/black"
+                            android:textSize="16sp"/>
+                    </LinearLayout>
+
+                    <!-- Group Row -->
+                    <LinearLayout android:id="@+id/ll_group_row" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="vertical"
+                        android:visibility="gone">
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:background="#EEEEEE" android:layout_marginTop="12dp"
+                            android:layout_marginBottom="12dp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Group" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tv_detail_group_info" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textColor="@android:color/black"
+                            android:textSize="16sp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <Button android:id="@+id/btn_delete" android:layout_width="match_parent"
+                android:layout_height="52dp" android:layout_marginTop="4dp"
+                android:layout_marginBottom="80dp" android:backgroundTint="#D32F2F"
+                android:text="Delete Contact" android:textColor="@android:color/white"
+                android:textSize="16sp"/>
         </LinearLayout>
     </ScrollView>
 
-    <!-- FAB Edit -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Edit Contact"
-        android:src="@drawable/ic_edit"
-        app:backgroundTint="@color/colorAccent"
-        app:tint="@android:color/white" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/fab_edit"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end" android:layout_margin="16dp"
+        android:contentDescription="Edit" android:src="@drawable/ic_edit"
+        app:backgroundTint="@color/colorAccent" app:tint="@android:color/white"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

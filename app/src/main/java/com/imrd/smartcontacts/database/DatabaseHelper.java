@@ -13,41 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DatabaseHelper.java
- * -------------------------------------------------
- * Owns both SQLite tables:
- *
- * Table: users
- * ─────────────────────────────────────────────────
- * _id         INTEGER PRIMARY KEY AUTOINCREMENT
- * full_name   TEXT NOT NULL
- * username    TEXT NOT NULL UNIQUE
- * pin_hash    TEXT NOT NULL
- * created_at  INTEGER NOT NULL
- *
- * Table: contacts
- * ─────────────────────────────────────────────────
- * _id         INTEGER PRIMARY KEY AUTOINCREMENT
- * user_id     INTEGER NOT NULL  ← FK → users._id
- * first_name  TEXT NOT NULL
- * last_name   TEXT NOT NULL
- * mobile      TEXT NOT NULL
- * email       TEXT NOT NULL
- * city        TEXT NOT NULL
- * state       TEXT NOT NULL
- * photo       BLOB
- *
- * NOTE: mobile & email uniqueness is now scoped
- * per-user (same number can exist for different users).
- * -------------------------------------------------
+ * DatabaseHelper.java  — MODIFIED (Batch 1)
+ * DB version bumped 3 → 4
+ * New columns: dob TEXT, group_tag TEXT in contacts table
+ * New methods: filterByCity(), filterByGroup(), updatePin(), getUserById()
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    // ── DB meta ──────────────────────────────────
     private static final String DB_NAME    = "smart_contacts.db";
-    private static final int    DB_VERSION = 3; // v3: users table + user_id on contacts
+    private static final int    DB_VERSION = 4;
 
-    // ── Users table ───────────────────────────────
+    // Users table
     public static final String TABLE_USERS    = "users";
     public static final String COL_U_ID       = "_id";
     public static final String COL_FULL_NAME  = "full_name";
@@ -55,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_PIN_HASH   = "pin_hash";
     public static final String COL_CREATED_AT = "created_at";
 
-    // ── Contacts table ────────────────────────────
+    // Contacts table
     public static final String TABLE_CONTACTS = "contacts";
     public static final String COL_ID         = "_id";
     public static final String COL_USER_ID    = "user_id";
@@ -66,45 +42,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_CITY       = "city";
     public static final String COL_STATE      = "state";
     public static final String COL_PHOTO      = "photo";
+    public static final String COL_DOB        = "dob";
+    public static final String COL_GROUP_TAG  = "group_tag";
 
-    // ── CREATE statements ─────────────────────────
     private static final String CREATE_USERS =
-        "CREATE TABLE " + TABLE_USERS + " (" +
-        COL_U_ID       + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        COL_FULL_NAME  + " TEXT NOT NULL, " +
-        COL_USERNAME   + " TEXT NOT NULL UNIQUE, " +
-        COL_PIN_HASH   + " TEXT NOT NULL, " +
-        COL_CREATED_AT + " INTEGER NOT NULL" +
-        ");";
+        "CREATE TABLE " + TABLE_USERS + "(" +
+        COL_U_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+        COL_FULL_NAME + " TEXT NOT NULL," +
+        COL_USERNAME + " TEXT NOT NULL UNIQUE," +
+        COL_PIN_HASH + " TEXT NOT NULL," +
+        COL_CREATED_AT + " INTEGER NOT NULL);";
 
     private static final String CREATE_CONTACTS =
-        "CREATE TABLE " + TABLE_CONTACTS + " (" +
-        COL_ID         + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        COL_USER_ID    + " INTEGER NOT NULL, " +
-        COL_FIRST_NAME + " TEXT NOT NULL, " +
-        COL_LAST_NAME  + " TEXT NOT NULL, " +
-        COL_MOBILE     + " TEXT NOT NULL, " +
-        COL_EMAIL      + " TEXT NOT NULL, " +
-        COL_CITY       + " TEXT NOT NULL, " +
-        COL_STATE      + " TEXT NOT NULL, " +
-        COL_PHOTO      + " BLOB, " +
-        "FOREIGN KEY(" + COL_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COL_U_ID + ")" +
-        ");";
+        "CREATE TABLE " + TABLE_CONTACTS + "(" +
+        COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+        COL_USER_ID + " INTEGER NOT NULL," +
+        COL_FIRST_NAME + " TEXT NOT NULL," +
+        COL_LAST_NAME + " TEXT NOT NULL," +
+        COL_MOBILE + " TEXT NOT NULL," +
+        COL_EMAIL + " TEXT NOT NULL," +
+        COL_CITY + " TEXT NOT NULL," +
+        COL_STATE + " TEXT NOT NULL," +
+        COL_PHOTO + " BLOB," +
+        COL_DOB + " TEXT," +
+        COL_GROUP_TAG + " TEXT," +
+        "FOREIGN KEY(" + COL_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COL_U_ID + "));";
 
-    // ── Singleton ─────────────────────────────────
     private static DatabaseHelper instance;
 
     public static synchronized DatabaseHelper getInstance(Context ctx) {
-        if (instance == null)
-            instance = new DatabaseHelper(ctx.getApplicationContext());
+        if (instance == null) instance = new DatabaseHelper(ctx.getApplicationContext());
         return instance;
     }
 
-    private DatabaseHelper(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
-    }
-
-    // ── Lifecycle ─────────────────────────────────
+    private DatabaseHelper(Context context) { super(context, DB_NAME, null, DB_VERSION); }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -118,10 +89,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COL_PHOTO + " BLOB");
         }
         if (oldVersion < 3) {
-            // Create users table
             db.execSQL(CREATE_USERS);
-            // Add user_id column to contacts (default 1 for existing rows)
             db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COL_USER_ID + " INTEGER NOT NULL DEFAULT 1");
+        }
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COL_DOB + " TEXT");
+            db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COL_GROUP_TAG + " TEXT");
         }
     }
 
@@ -131,18 +104,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.setForeignKeyConstraintsEnabled(true);
     }
 
-    // ════════════════════════════════════════════════
+    // ══════════════════════════════════════════
     //  USER OPERATIONS
-    // ════════════════════════════════════════════════
+    // ══════════════════════════════════════════
 
-    /**
-     * Register a new user.
-     * @return positive row-id on success, -1 if username taken.
-     */
     public long registerUser(User user) {
         if (isUsernameExists(user.getUsername())) return -1;
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv  = new ContentValues();
+        ContentValues cv = new ContentValues();
         cv.put(COL_FULL_NAME,  user.getFullName());
         cv.put(COL_USERNAME,   user.getUsername());
         cv.put(COL_PIN_HASH,   user.getPinHash());
@@ -152,24 +121,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    /**
-     * Fetch a user by username for login verification.
-     * Returns null if username not found.
-     */
     public User getUserByUsername(String username) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE_USERS, null,
-            COL_USERNAME + "=?", new String[]{username},
-            null, null, null);
+            COL_USERNAME + "=?", new String[]{username}, null, null, null);
         User user = null;
         if (cursor != null && cursor.moveToFirst()) {
             user = new User(
-                cursor.getInt   (cursor.getColumnIndexOrThrow(COL_U_ID)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(COL_U_ID)),
                 cursor.getString(cursor.getColumnIndexOrThrow(COL_FULL_NAME)),
                 cursor.getString(cursor.getColumnIndexOrThrow(COL_USERNAME)),
                 cursor.getString(cursor.getColumnIndexOrThrow(COL_PIN_HASH)),
-                cursor.getLong  (cursor.getColumnIndexOrThrow(COL_CREATED_AT))
-            );
+                cursor.getLong(cursor.getColumnIndexOrThrow(COL_CREATED_AT)));
+            cursor.close();
+        }
+        db.close();
+        return user;
+    }
+
+    public User getUserById(int userId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS, null,
+            COL_U_ID + "=?", new String[]{String.valueOf(userId)}, null, null, null);
+        User user = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            user = new User(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COL_U_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COL_FULL_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COL_USERNAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COL_PIN_HASH)),
+                cursor.getLong(cursor.getColumnIndexOrThrow(COL_CREATED_AT)));
             cursor.close();
         }
         db.close();
@@ -178,46 +159,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean isUsernameExists(String username) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-            "SELECT " + COL_U_ID + " FROM " + TABLE_USERS + " WHERE " + COL_USERNAME + "=?",
-            new String[]{username});
-        boolean exists = cursor != null && cursor.getCount() > 0;
-        if (cursor != null) cursor.close();
+        Cursor c = db.rawQuery("SELECT " + COL_U_ID + " FROM " + TABLE_USERS +
+            " WHERE " + COL_USERNAME + "=?", new String[]{username});
+        boolean exists = c != null && c.getCount() > 0;
+        if (c != null) c.close();
         db.close();
         return exists;
     }
 
-    // ════════════════════════════════════════════════
-    //  CONTACT OPERATIONS  (all scoped to userId)
-    // ════════════════════════════════════════════════
+    public boolean updatePin(int userId, String newPinHash) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_PIN_HASH, newPinHash);
+        int rows = db.update(TABLE_USERS, cv, COL_U_ID + "=?",
+            new String[]{String.valueOf(userId)});
+        db.close();
+        return rows > 0;
+    }
 
-    /**
-     * Insert a new contact for the given user.
-     * @return  positive id on success
-     *          -1 if mobile duplicate for this user
-     *          -2 if email  duplicate for this user
-     *          -3 other error
-     */
+    // ══════════════════════════════════════════
+    //  CONTACT OPERATIONS
+    // ══════════════════════════════════════════
+
     public long insertContact(Contact c, int userId) {
         if (isMobileExists(c.getMobile(), -1, userId)) return -1;
-        if (isEmailExists (c.getEmail(),  -1, userId)) return -2;
+        if (isEmailExists(c.getEmail(),   -1, userId)) return -2;
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv  = toContentValues(c, userId);
-        long result = db.insert(TABLE_CONTACTS, null, cv);
+        long result = db.insert(TABLE_CONTACTS, null, toContentValues(c, userId));
         db.close();
         return result > 0 ? result : -3;
     }
 
-    /**
-     * Update an existing contact (must belong to userId).
-     * @return  1 on success, -1 mobile dup, -2 email dup, -3 error
-     */
     public int updateContact(Contact c, int userId) {
         if (isMobileExists(c.getMobile(), c.getId(), userId)) return -1;
-        if (isEmailExists (c.getEmail(),  c.getId(), userId)) return -2;
+        if (isEmailExists(c.getEmail(),   c.getId(), userId)) return -2;
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv  = toContentValues(c, userId);
-        int rows = db.update(TABLE_CONTACTS, cv,
+        int rows = db.update(TABLE_CONTACTS, toContentValues(c, userId),
             COL_ID + "=? AND " + COL_USER_ID + "=?",
             new String[]{String.valueOf(c.getId()), String.valueOf(userId)});
         db.close();
@@ -249,14 +226,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<Contact> getAllContacts(int userId) {
-        return queryContacts(
-            COL_USER_ID + "=?", new String[]{String.valueOf(userId)},
-            COL_FIRST_NAME + " ASC");
+        return queryContacts(COL_USER_ID + "=?",
+            new String[]{String.valueOf(userId)}, COL_FIRST_NAME + " ASC");
     }
 
     public List<Contact> searchContacts(String keyword, int userId) {
         String like = "%" + keyword + "%";
-        String sel  = COL_USER_ID + "=? AND (" +
+        String sel = COL_USER_ID + "=? AND (" +
             COL_FIRST_NAME + " LIKE ? OR " + COL_LAST_NAME + " LIKE ? OR " +
             COL_MOBILE + " LIKE ? OR " + COL_EMAIL + " LIKE ?)";
         return queryContacts(sel,
@@ -265,100 +241,96 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<Contact> filterByLocation(String city, String state, int userId) {
-        List<String> conditions = new ArrayList<>();
-        List<String> args       = new ArrayList<>();
-        conditions.add(COL_USER_ID + "=?");
-        args.add(String.valueOf(userId));
-        if (city  != null && !city.isEmpty())  { conditions.add(COL_CITY  + " LIKE ?"); args.add("%" + city  + "%"); }
-        if (state != null && !state.isEmpty()) { conditions.add(COL_STATE + " LIKE ?"); args.add("%" + state + "%"); }
-        String selection = String.join(" AND ", conditions);
-        return queryContacts(selection, args.toArray(new String[0]),
+        List<String> conds = new ArrayList<>();
+        List<String> args  = new ArrayList<>();
+        conds.add(COL_USER_ID + "=?"); args.add(String.valueOf(userId));
+        if (city  != null && !city.isEmpty())  { conds.add(COL_CITY  + " LIKE ?"); args.add("%" + city  + "%"); }
+        if (state != null && !state.isEmpty()) { conds.add(COL_STATE + " LIKE ?"); args.add("%" + state + "%"); }
+        return queryContacts(String.join(" AND ", conds), args.toArray(new String[0]),
             COL_STATE + " ASC, " + COL_CITY + " ASC, " + COL_FIRST_NAME + " ASC");
     }
 
-    public List<String> getDistinctCities(int userId) {
-        return getDistinctColumn(COL_CITY, userId);
+    /** NEW — Filter by exact city name for GPS Nearby feature */
+    public List<Contact> filterByCity(String city, int userId) {
+        return queryContacts(
+            COL_USER_ID + "=? AND " + COL_CITY + "=?",
+            new String[]{String.valueOf(userId), city},
+            COL_FIRST_NAME + " ASC");
     }
 
-    public List<String> getDistinctStates(int userId) {
-        return getDistinctColumn(COL_STATE, userId);
+    /** NEW — Filter by group tag */
+    public List<Contact> filterByGroup(String groupTag, int userId) {
+        return queryContacts(
+            COL_USER_ID + "=? AND " + COL_GROUP_TAG + "=?",
+            new String[]{String.valueOf(userId), groupTag},
+            COL_FIRST_NAME + " ASC");
     }
 
-    private List<String> getDistinctColumn(String column, int userId) {
+    public List<String> getDistinctCities(int userId)  { return getDistinctColumn(COL_CITY,  userId); }
+    public List<String> getDistinctStates(int userId)  { return getDistinctColumn(COL_STATE, userId); }
+
+    private List<String> getDistinctColumn(String col, int userId) {
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-            "SELECT DISTINCT " + column + " FROM " + TABLE_CONTACTS +
-            " WHERE " + COL_USER_ID + "=? ORDER BY " + column + " ASC",
+        Cursor c = db.rawQuery("SELECT DISTINCT " + col + " FROM " + TABLE_CONTACTS +
+            " WHERE " + COL_USER_ID + "=? ORDER BY " + col + " ASC",
             new String[]{String.valueOf(userId)});
-        if (cursor != null) {
-            while (cursor.moveToNext()) list.add(cursor.getString(0));
-            cursor.close();
-        }
+        if (c != null) { while (c.moveToNext()) list.add(c.getString(0)); c.close(); }
         db.close();
         return list;
     }
 
-    // ── Uniqueness checks (scoped per user) ────────
-
-    public boolean isMobileExists(String mobile, int excludeContactId, int userId) {
+    public boolean isMobileExists(String mobile, int excludeId, int userId) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-            "SELECT " + COL_ID + " FROM " + TABLE_CONTACTS +
+        Cursor c = db.rawQuery("SELECT " + COL_ID + " FROM " + TABLE_CONTACTS +
             " WHERE " + COL_MOBILE + "=? AND " + COL_ID + "!=? AND " + COL_USER_ID + "=?",
-            new String[]{mobile, String.valueOf(excludeContactId), String.valueOf(userId)});
-        boolean exists = cursor != null && cursor.getCount() > 0;
-        if (cursor != null) cursor.close();
+            new String[]{mobile, String.valueOf(excludeId), String.valueOf(userId)});
+        boolean exists = c != null && c.getCount() > 0;
+        if (c != null) c.close();
         db.close();
         return exists;
     }
 
-    public boolean isEmailExists(String email, int excludeContactId, int userId) {
+    public boolean isEmailExists(String email, int excludeId, int userId) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-            "SELECT " + COL_ID + " FROM " + TABLE_CONTACTS +
+        Cursor c = db.rawQuery("SELECT " + COL_ID + " FROM " + TABLE_CONTACTS +
             " WHERE " + COL_EMAIL + "=? AND " + COL_ID + "!=? AND " + COL_USER_ID + "=?",
-            new String[]{email, String.valueOf(excludeContactId), String.valueOf(userId)});
-        boolean exists = cursor != null && cursor.getCount() > 0;
-        if (cursor != null) cursor.close();
+            new String[]{email, String.valueOf(excludeId), String.valueOf(userId)});
+        boolean exists = c != null && c.getCount() > 0;
+        if (c != null) c.close();
         db.close();
         return exists;
     }
 
-    // ── Backup: get all contacts as list (no photo) ─
+    public List<Contact> getAllContactsForBackup(int userId) { return getAllContacts(userId); }
 
-    /** Returns all contacts for a user — used for JSON backup. */
-    public List<Contact> getAllContactsForBackup(int userId) {
-        return getAllContacts(userId);
-    }
+    // ── Private helpers ───────────────────────────
 
-    // ── Private helpers ────────────────────────────
-
-    private List<Contact> queryContacts(String selection, String[] args, String orderBy) {
+    private List<Contact> queryContacts(String sel, String[] args, String orderBy) {
         List<Contact> list = new ArrayList<>();
         SQLiteDatabase db  = getReadableDatabase();
-        Cursor cursor = db.query(TABLE_CONTACTS, null, selection, args, null, null, orderBy);
-        if (cursor != null) {
-            while (cursor.moveToNext()) list.add(cursorToContact(cursor));
-            cursor.close();
-        }
+        Cursor cursor = db.query(TABLE_CONTACTS, null, sel, args, null, null, orderBy);
+        if (cursor != null) { while (cursor.moveToNext()) list.add(cursorToContact(cursor)); cursor.close(); }
         db.close();
         return list;
     }
 
     private Contact cursorToContact(Cursor cursor) {
-        int photoIndex = cursor.getColumnIndexOrThrow(COL_PHOTO);
-        byte[] photo   = cursor.isNull(photoIndex) ? null : cursor.getBlob(photoIndex);
+        int photoIdx = cursor.getColumnIndexOrThrow(COL_PHOTO);
+        byte[] photo = cursor.isNull(photoIdx) ? null : cursor.getBlob(photoIdx);
+        int dobIdx   = cursor.getColumnIndex(COL_DOB);
+        int grpIdx   = cursor.getColumnIndex(COL_GROUP_TAG);
+        String dob   = (dobIdx >= 0 && !cursor.isNull(dobIdx)) ? cursor.getString(dobIdx) : null;
+        String grp   = (grpIdx >= 0 && !cursor.isNull(grpIdx)) ? cursor.getString(grpIdx) : null;
         return new Contact(
-            cursor.getInt   (cursor.getColumnIndexOrThrow(COL_ID)),
+            cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_FIRST_NAME)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_LAST_NAME)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_MOBILE)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_EMAIL)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_CITY)),
             cursor.getString(cursor.getColumnIndexOrThrow(COL_STATE)),
-            photo
-        );
+            photo, dob, grp);
     }
 
     private ContentValues toContentValues(Contact c, int userId) {
@@ -370,8 +342,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_EMAIL,      c.getEmail());
         cv.put(COL_CITY,       c.getCity());
         cv.put(COL_STATE,      c.getState());
-        if (c.hasPhoto()) cv.put(COL_PHOTO, c.getPhoto());
-        else              cv.putNull(COL_PHOTO);
+        if (c.hasPhoto()) cv.put(COL_PHOTO, c.getPhoto()); else cv.putNull(COL_PHOTO);
+        if (c.hasDob())   cv.put(COL_DOB,   c.getDob());   else cv.putNull(COL_DOB);
+        if (c.hasGroup()) cv.put(COL_GROUP_TAG, c.getGroupTag()); else cv.putNull(COL_GROUP_TAG);
         return cv;
     }
 }

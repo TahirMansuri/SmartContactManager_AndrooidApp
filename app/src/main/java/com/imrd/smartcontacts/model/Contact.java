@@ -1,23 +1,8 @@
 package com.imrd.smartcontacts.model;
 
 /**
- * Contact.java
- * -------------------------------------------------
- * POJO representing one row in the SQLite "contacts"
- * table. Includes an optional photo field stored
- * as a byte array (BLOB) in the database.
- *
- * Fields
- * -------
- * id          – auto-generated primary key
- * firstName   – first name  (required)
- * lastName    – last name   (required)
- * mobile      – 10-digit mobile number (unique, required)
- * email       – email address (unique, required)
- * city        – city  name   (required)
- * state       – state name   (required)
- * photo       – profile picture as byte[] (optional, nullable)
- * -------------------------------------------------
+ * Contact.java  — MODIFIED (Batch 1)
+ * Added: dob (Date of Birth), groupTag (Group/Tag label), getAge(), hasDob(), hasGroup()
  */
 public class Contact {
 
@@ -28,11 +13,13 @@ public class Contact {
     private String email;
     private String city;
     private String state;
-    private byte[] photo;       // nullable – null means "no photo set"
+    private byte[] photo;
+    private String dob;        // format: dd/MM/yyyy  (nullable)
+    private String groupTag;   // "Family", "Work", etc. (nullable)
 
-    // ── Constructors ────────────────────────────────
+    // ── Constructors ──────────────────────────────
 
-    /** Used when creating a brand-new contact (no DB id yet, no photo). */
+    /** New contact — no id, no photo, no dob, no group. */
     public Contact(String firstName, String lastName,
                    String mobile,    String email,
                    String city,      String state) {
@@ -42,15 +29,15 @@ public class Contact {
         this.email     = email;
         this.city      = city;
         this.state     = state;
-        this.photo     = null;
     }
 
-    /** Used when reading a contact back from the database (with photo). */
+    /** Full constructor — reading from DB. */
     public Contact(int id,
                    String firstName, String lastName,
                    String mobile,    String email,
                    String city,      String state,
-                   byte[] photo) {
+                   byte[] photo,     String dob,
+                   String groupTag) {
         this.id        = id;
         this.firstName = firstName;
         this.lastName  = lastName;
@@ -59,9 +46,11 @@ public class Contact {
         this.city      = city;
         this.state     = state;
         this.photo     = photo;
+        this.dob       = dob;
+        this.groupTag  = groupTag;
     }
 
-    // ── Getters ─────────────────────────────────────
+    // ── Getters ───────────────────────────────────
 
     public int    getId()        { return id;        }
     public String getFirstName() { return firstName; }
@@ -71,34 +60,54 @@ public class Contact {
     public String getCity()      { return city;      }
     public String getState()     { return state;     }
     public byte[] getPhoto()     { return photo;     }
+    public String getDob()       { return dob;       }
+    public String getGroupTag()  { return groupTag;  }
 
-    /** Returns true if this contact has a profile photo saved. */
-    public boolean hasPhoto()    { return photo != null && photo.length > 0; }
+    public boolean hasPhoto()  { return photo != null && photo.length > 0; }
+    public boolean hasDob()    { return dob != null && !dob.isEmpty(); }
+    public boolean hasGroup()  { return groupTag != null && !groupTag.isEmpty() && !groupTag.equals("None"); }
 
-    // ── Setters ─────────────────────────────────────
+    // ── Setters ───────────────────────────────────
 
-    public void setId(int id)           { this.id        = id;        }
-    public void setFirstName(String v)  { this.firstName = v;         }
-    public void setLastName(String v)   { this.lastName  = v;         }
-    public void setMobile(String v)     { this.mobile    = v;         }
-    public void setEmail(String v)      { this.email     = v;         }
-    public void setCity(String v)       { this.city      = v;         }
-    public void setState(String v)      { this.state     = v;         }
-    public void setPhoto(byte[] photo)  { this.photo     = photo;     }
+    public void setId(int id)            { this.id        = id;      }
+    public void setFirstName(String v)   { this.firstName = v;       }
+    public void setLastName(String v)    { this.lastName  = v;       }
+    public void setMobile(String v)      { this.mobile    = v;       }
+    public void setEmail(String v)       { this.email     = v;       }
+    public void setCity(String v)        { this.city      = v;       }
+    public void setState(String v)       { this.state     = v;       }
+    public void setPhoto(byte[] photo)   { this.photo     = photo;   }
+    public void setDob(String dob)       { this.dob       = dob;     }
+    public void setGroupTag(String g)    { this.groupTag  = g;       }
 
-    // ── Helpers ─────────────────────────────────────
+    // ── Helpers ───────────────────────────────────
 
-    /** Convenience: full name shown in lists. */
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
+    public String getFullName() { return firstName + " " + lastName; }
 
-    /** Initials for the avatar circle (e.g. "AB" from "Alice Bob"). */
     public String getInitials() {
         String f = (firstName != null && !firstName.isEmpty())
                    ? String.valueOf(firstName.charAt(0)).toUpperCase() : "";
         String l = (lastName  != null && !lastName.isEmpty())
                    ? String.valueOf(lastName.charAt(0)).toUpperCase()  : "";
         return f + l;
+    }
+
+    /** Returns age from DOB, or -1 if DOB not set. */
+    public int getAge() {
+        if (!hasDob()) return -1;
+        try {
+            String[] parts = dob.split("/");
+            int dobYear  = Integer.parseInt(parts[2]);
+            int dobMonth = Integer.parseInt(parts[1]);
+            int dobDay   = Integer.parseInt(parts[0]);
+            java.util.Calendar today = java.util.Calendar.getInstance();
+            int age = today.get(java.util.Calendar.YEAR) - dobYear;
+            if (today.get(java.util.Calendar.MONTH) + 1 < dobMonth ||
+               (today.get(java.util.Calendar.MONTH) + 1 == dobMonth &&
+                today.get(java.util.Calendar.DAY_OF_MONTH) < dobDay)) {
+                age--;
+            }
+            return age;
+        } catch (Exception e) { return -1; }
     }
 }
